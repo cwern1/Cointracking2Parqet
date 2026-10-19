@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Cointracking2Parqet</title>
+  <meta name="description" content="Sync your CoinTracking crypto transactions into a Parqet portfolio. Runs entirely in your browser.">
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f6f6f8">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#17181a">
+  <meta name="referrer" content="no-referrer">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="manifest" href="/manifest.json">
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/app/main.js"></script>
+</head>
+<body>
+  <div class="page">
+    <header class="page-header">
+      <p class="eyebrow">Crypto sync for Parqet</p>
+      <h1>Cointracking2Parqet</h1>
+      <p class="lede">Import every crypto transaction from CoinTracking into a Parqet portfolio. Runs in your browser. Nothing is stored on a server.</p>
+    </header>
+
+    <div id="setup-notice" class="notice warning" role="alert" hidden>
+      <strong>Setup incomplete</strong>
+      PARQET_CLIENT_ID is not set. See the README.
+    </div>
+    <div id="error" class="notice error" role="alert" hidden>
+      <strong id="error-title"></strong>
+      <span id="error-detail"></span>
+    </div>
+
+    <!-- 1 · Parqet -->
+    <section class="group" aria-labelledby="g-parqet">
+      <h2 class="group-label" id="g-parqet"><span class="step" id="step-parqet">1</span> Parqet</h2>
+      <div class="card">
+        <div id="parqet-disconnected" class="row">
+          <p class="muted small">Sign in to Parqet and allow access to your portfolios.</p>
+          <button id="connect" class="btn primary" type="button">Connect Parqet</button>
+        </div>
+        <div id="parqet-connected" hidden>
+          <div class="row">
+            <span class="status-line"><span class="dot ok" aria-hidden="true"></span> Connected</span>
+            <button id="disconnect" class="btn link small" type="button">Disconnect</button>
+          </div>
+          <p class="field-label mt-1" id="pf-label">Target portfolio</p>
+          <p id="pf-loading" class="muted small">Loading portfolios…</p>
+          <div id="portfolios" class="chips" role="radiogroup" aria-labelledby="pf-label"></div>
+          <form id="new-portfolio-form" class="inline-form" hidden>
+            <input id="new-portfolio-name" class="input" aria-label="Portfolio name" maxlength="80" value="Crypto">
+            <button class="btn primary" type="submit">Create</button>
+            <button id="new-portfolio-cancel" class="btn ghost" type="button">Cancel</button>
+          </form>
+          <p class="hint">Use a portfolio just for crypto. Cointracking2Parqet only changes activities it created itself.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2 · CoinTracking -->
+    <section class="group" aria-labelledby="g-ct">
+      <h2 class="group-label" id="g-ct"><span class="step" id="step-ct">2</span> CoinTracking</h2>
+      <div class="card">
+        <form id="unlock-form" hidden>
+          <label class="field">
+            <span class="field-label">Passphrase for your saved API key</span>
+            <input id="unlock-pass" class="input" type="password" autocomplete="current-password">
+          </label>
+          <div class="row mt-08">
+            <button id="forget" class="btn link small" type="button">Forget saved key</button>
+            <button class="btn primary" type="submit">Unlock</button>
+          </div>
+        </form>
+        <div id="creds-form">
+          <label class="field">
+            <span class="field-label">API key</span>
+            <input id="ct-key" class="input" autocomplete="off" spellcheck="false">
+          </label>
+          <label class="field">
+            <span class="field-label">API secret</span>
+            <input id="ct-secret" class="input" type="password" autocomplete="off">
+          </label>
+          <label class="check" id="remember-row">
+            <input id="remember" type="checkbox">
+            Remember in this browser, encrypted with a passphrase
+          </label>
+          <label class="field mt-08" id="passphrase-row" hidden>
+            <span class="field-label">Passphrase</span>
+            <input id="passphrase" class="input" type="password" autocomplete="new-password">
+          </label>
+          <p class="hint">
+            Create a key with read access only under
+            <a href="https://cointracking.info/api/api.php" target="_blank" rel="noopener noreferrer">CoinTracking → API</a>.
+            The secret signs each request here in your browser and is never sent anywhere.
+          </p>
+        </div>
+        <p class="hint">CoinTracking allows 20 API calls per hour. A preview uses 2, a balance check 1. Used in the last hour: <span id="ct-calls">0</span>.</p>
+      </div>
+    </section>
+
+    <!-- 3 · Review -->
+    <section class="group" id="review" aria-labelledby="g-review" aria-live="polite" hidden>
+      <h2 class="group-label" id="g-review"><span class="step">3</span> Review</h2>
+      <div id="plan-error" class="notice error" hidden><strong id="plan-error-text"></strong></div>
+      <div id="result"></div>
+      <div id="renames" class="notice warning" role="status" hidden>
+        <strong>Check these coin symbols</strong>
+        <span id="renames-text"></span>
+        <div class="chips mt-06"><button id="renames-apply" class="btn primary small" type="button"></button></div>
+      </div>
+      <div id="stats" class="stats"></div>
+      <div id="sections"></div>
+      <div class="row mt-12">
+        <span class="muted small" id="fetched-at"></span>
+        <span class="chips">
+          <button id="check-balances" class="btn ghost small" type="button">Check balances</button>
+          <button id="read-again" class="btn ghost small" type="button">Read again</button>
+        </span>
+      </div>
+      <div id="balances"></div>
+    </section>
+
+    <div class="cta-bar">
+      <div class="cta-row">
+        <button id="open-options" class="cta secondary" type="button" aria-haspopup="dialog">Options</button>
+        <button id="cta" class="cta" type="button" disabled>Preview changes</button>
+      </div>
+      <p id="cta-note" class="cta-note">Connect Parqet and enter your CoinTracking API key to start.</p>
+    </div>
+
+    <dialog id="options" class="sheet" aria-labelledby="options-title">
+      <form method="dialog" class="sheet-inner" id="options-form">
+        <h2 class="sheet-title" id="options-title">Options</h2>
+        <div class="sheet-section">
+          <p class="sheet-label" id="opt-incomeAs">Staking, mining, airdrops</p>
+          <div class="chips" role="radiogroup" aria-labelledby="opt-incomeAs" data-option="incomeAs">
+            <button type="button" class="chip" role="radio" data-value="transfer_in">Transfer in</button>
+            <button type="button" class="chip" role="radio" data-value="buy">Buy</button>
+          </div>
+          <p class="hint">Transfer in adds the coins at market value without counting them as invested money.</p>
+        </div>
+        <div class="sheet-section">
+          <p class="sheet-label" id="opt-cryptoFees">Fees paid in crypto</p>
+          <div class="chips" role="radiogroup" aria-labelledby="opt-cryptoFees" data-option="cryptoFees">
+            <button type="button" class="chip" role="radio" data-value="included">Already in amounts</button>
+            <button type="button" class="chip" role="radio" data-value="separate">Deduct separately</button>
+          </div>
+          <p class="hint">CoinTracking usually includes fees in the traded amounts. Switch only if the balance check shows a difference equal to your fees.</p>
+        </div>
+        <div class="sheet-section">
+          <p class="sheet-label" id="opt-defiAsTransfers">Loans, collateral, liquidity</p>
+          <div class="chips" role="radiogroup" aria-labelledby="opt-defiAsTransfers" data-option="defiAsTransfers">
+            <button type="button" class="chip" role="radio" data-value="false">Skip</button>
+            <button type="button" class="chip" role="radio" data-value="true">Import as transfers</button>
+          </div>
+          <p class="hint">Margin and futures trades are never imported.</p>
+        </div>
+        <div class="sheet-section">
+          <p class="sheet-label" id="opt-removeOrphans">Deleted in CoinTracking</p>
+          <div class="chips" role="radiogroup" aria-labelledby="opt-removeOrphans" data-option="removeOrphans">
+            <button type="button" class="chip" role="radio" data-value="false">Keep in Parqet</button>
+            <button type="button" class="chip" role="radio" data-value="true">Remove from Parqet</button>
+          </div>
+          <p class="hint">Applies to activities this app created whose transaction no longer exists in CoinTracking.</p>
+        </div>
+        <div class="sheet-section">
+          <label class="sheet-label" for="opt-map">Rename coins</label>
+          <textarea id="opt-map" class="input" rows="3" placeholder="IOTA=MIOTA"></textarea>
+          <p class="hint">One per line, CoinTracking symbol = Parqet symbol.</p>
+        </div>
+        <div class="sheet-section">
+          <label class="sheet-label" for="opt-skip">Never import</label>
+          <input id="opt-skip" class="input" placeholder="e.g. LUNC, SCAM">
+        </div>
+        <div class="sheet-section danger-zone">
+          <p class="sheet-label">Start over</p>
+          <button id="reset" type="button" class="btn danger">Remove all synced activities</button>
+          <p class="hint">Deletes only what Cointracking2Parqet created in the selected portfolio.</p>
+        </div>
+        <div class="sheet-actions">
+          <button class="btn primary" type="submit">Done</button>
+        </div>
+      </form>
+    </dialog>
+
+    <footer class="footer">
+      <p>Not affiliated with Parqet or CoinTracking. <a href="https://github.com/cwern1/Cointracking2Parqet" target="_blank" rel="noopener">Source</a></p>
+      <p>
+        <a href="https://christoph-werner.com/" target="_blank" rel="noopener">christoph-werner.com</a>
+        ·
+        <a href="https://christoph-werner.com/imprint.html" target="_blank" rel="noopener">Legal</a>
+      </p>
+    </footer>
+  </div>
+</body>
+</html>
