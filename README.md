@@ -26,7 +26,7 @@ Neither API sends CORS headers that would allow a direct browser call. A small r
 
 The optional "remember in this browser" setting encrypts key and secret with AES-GCM. The key is derived from a passphrase with PBKDF2 at 600k iterations.
 
-Whoever runs the relay could change its code. If you don't trust the host, deploy your own copy. It takes about five minutes.
+Whoever runs the relay could change its code. If you don't trust the host, deploy your own copy. It takes about five minutes and needs no tooling.
 
 ## Sync rules
 
@@ -53,6 +53,19 @@ All prices are fiat values at the time of each transaction, in your CoinTracking
 
 Each preview costs 2 CoinTracking API calls: trades plus ledger. The PRO plan allows 20 calls per hour. Changing options reuses the data already fetched.
 
+## No dependencies
+
+There is no npm, no build step and no bundler. The browser loads the plain JavaScript modules in `public/` directly. The relay in `functions/` is plain JavaScript as well, and Cloudflare compiles it. Tests use Node's built-in test runner. Node is only needed for local development and tests, not in production.
+
+```
+public/            everything the browser loads, served as is
+  app/core/        CoinTracking and Parqet clients, mapping, sync logic
+  app/main.js      the UI
+functions/         the relay (Cloudflare Pages Functions)
+dev/server.js      local server: public/ plus the relay, like Cloudflare Pages
+tests/             node --test, with fake CoinTracking and Parqet servers
+```
+
 ## Setup
 
 1. **Parqet integration.** Open the [Parqet developer console](https://www.parqet.com/console/integrations) and create an integration.
@@ -62,46 +75,51 @@ Each preview costs 2 CoinTracking API calls: trades plus ledger. The PRO plan al
 
    The integration stays private, which is enough for your own account.
 2. **CoinTracking API key.** Go to [cointracking.info/api](https://cointracking.info/api/api.php) and create a key with **read access only**. API access requires a PRO, EXPERT or UNLIMITED plan.
-3. **Local run.** Copy the example environment file, add the client ID, then build and run:
+3. **Local run.** Requires Node 22 or newer:
    ```sh
-   cp .env.example .env.local   # set VITE_PARQET_CLIENT_ID
-   npm install
-   npm run dev                  # http://localhost:8788
+   cp .env.example .env.local   # set PARQET_CLIENT_ID
+   node dev/server.js           # http://localhost:8788
    ```
 
 ## Deploy to Cloudflare Pages
 
-```sh
-npx wrangler pages project create cointracking2parqet
-npm run deploy               # builds with .env.local, uploads dist/ and functions/
-```
+In the Cloudflare dashboard, open **Workers & Pages**, create a Pages project and connect this GitHub repository.
 
-Then attach a custom domain, for example `cointracking2parqet.christoph-werner.com`, in the Pages dashboard. Make sure observability and Logpush stay off for this project.
+| Setting | Value |
+|---|---|
+| Production branch | `main` |
+| Build command | *(empty)* |
+| Build output directory | `public` |
+| Environment variable | `PARQET_CLIENT_ID` = your client ID |
 
-If Parqet ever requires a confidential client, store the client secret as a Pages secret:
+Cloudflare serves `public/` and compiles `functions/` itself.
 
-```sh
-npx wrangler pages secret put PARQET_CLIENT_SECRET
-```
-
-The relay then adds it to token requests. It is an app secret, not user data.
+- **Domain:** Attach a custom domain such as `cointracking2parqet.christoph-werner.com`, and add `https://<domain>/callback` as a redirect URL in the Parqet console.
+- **Logging:** Keep observability and Logpush off for this project.
+- **Forks:** Cloudflare does not build previews for pull requests from forks. Production only builds from `main`, where only the maintainer merges.
+- **Confidential client:** If Parqet ever requires one, add `PARQET_CLIENT_SECRET` as an encrypted variable. The relay then adds it to token requests. It is an app secret, not user data.
 
 ## Contributing
 
-Pull requests are welcome. Every change is reviewed and merged by the maintainer. Please report security issues privately, see [SECURITY.md](SECURITY.md).
+Pull requests are welcome. Every change is reviewed and merged by the maintainer. Please report security issues privately, see [SECURITY.md](SECURITY.md). Please keep the project free of dependencies.
 
 ## Tests
 
 ```sh
-npm test        # unit tests: signing, parsing, every mapping branch, plan, relay, OAuth, vault, full sync
-npm run e2e     # Playwright on desktop and phone against the real relay in wrangler, with fake upstreams
+node scripts/fetch-spec.mjs   # once: downloads Parqet's OpenAPI spec to spec/
+node --test tests/
 ```
+
+The suite covers:
+
+- **Units:** signing, parsing, every mapping branch, the sync plan, the relay, OAuth with PKCE and the vault.
+- **Integration:** a run that starts the dev server and relay against fake upstreams and drives login, sync and idempotence over HTTP.
 
 There is no sandbox for either API. The fakes in `tests/fakes/` enforce what is known about the real services:
 
 - CoinTracking's HMAC signature and nonce.
 - Parqet's PKCE check.
-- Parqet's request schema, validated against Parqet's official OpenAPI spec. `npm test` downloads it to `spec/` on first run. It is not part of this repo. Run `npm run spec:update` to refresh it.
+- Parqet's request schema, validated against Parqet's official OpenAPI spec with a small built-in validator. The spec belongs to Parqet and is not part of this repo.
 - Batch limits, `externalId` deduplication and cursor pagination.
 
 ## Verified on a live account
