@@ -1,4 +1,4 @@
-/* Cointracking2Parqet — same family as christoph-werner.com and RepSheet:
+/* Cointracking2Parqet:
    Things 3-inspired, quiet surfaces, one blue, system type. */
 
 :root {
@@ -16,13 +16,6 @@
   --warning: #b7791f;
   --warning-tint: rgba(183, 121, 31, 0.12);
   --card-bg: #f2f5f7;
-  --grad-a: #14b8a6;
-  --grad-b: var(--accent);
-  --grad-c: #8b5cf6;
-  --gradient: linear-gradient(95deg, var(--grad-a), var(--grad-b) 50%, var(--grad-c));
-  --glow-a: rgba(20, 184, 166, 0.12);
-  --glow-b: rgba(47, 124, 246, 0.1);
-  --glow-c: rgba(139, 92, 246, 0.1);
   color-scheme: light dark;
 }
 
@@ -42,11 +35,6 @@
     --warning: #f0b45a;
     --warning-tint: rgba(240, 180, 90, 0.12);
     --card-bg: #1c1d20;
-    --grad-a: #2dd4bf;
-    --grad-c: #a78bfa;
-    --glow-a: rgba(45, 212, 191, 0.08);
-    --glow-b: rgba(77, 148, 255, 0.08);
-    --glow-c: rgba(167, 139, 250, 0.08);
   }
 }
 
@@ -58,10 +46,6 @@ html, body { min-height: 100%; }
 html {
   -webkit-text-size-adjust: 100%;
   background-color: var(--bg);
-  background-image:
-    radial-gradient(50rem 30rem at 15% -5%, var(--glow-a), transparent 60%),
-    radial-gradient(45rem 28rem at 90% 10%, var(--glow-b), transparent 60%),
-    radial-gradient(55rem 32rem at 40% 110%, var(--glow-c), transparent 60%);
 }
 
 body {
