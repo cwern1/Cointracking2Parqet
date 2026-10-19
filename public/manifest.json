@@ -1,0 +1,9 @@
+{
+  "name": "Cointracking2Parqet",
+  "short_name": "CT2Parqet",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f6f8",
+  "theme_color": "#f6f6f8",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

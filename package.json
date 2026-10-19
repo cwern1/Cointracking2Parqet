@@ -1,0 +1,45 @@
+{
+  "name": "cointracking2parqet",
+  "version": "1.0.0",
+  "description": "Sync CoinTracking transactions into a Parqet portfolio, entirely in the browser.",
+  "scripts": {
+    "dev": "vite build --mode development && wrangler pages dev dist --port 8788",
+    "build": "tsc --noEmit && vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "playwright test",
+    "typecheck": "tsc --noEmit",
+    "deploy": "npm run build && wrangler pages deploy dist",
+    "pretest": "node scripts/fetch-spec.mjs",
+    "pree2e": "node scripts/fetch-spec.mjs",
+    "spec:update": "node scripts/fetch-spec.mjs --force"
+  },
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "preact": "^10.29.8"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261019.1",
+    "@playwright/test": "^1.64.1",
+    "@preact/preset-vite": "^2.10.6",
+    "@types/node": "^24.19.2",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.4",
+    "vitest": "^3.2.7",
+    "wrangler": "^4.151.2"
+  },
+  "allowScripts": {
+    "esbuild@0.25.12": true,
+    "esbuild@0.28.2": true,
+    "workerd@1.20261019.1": true
+  },
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cwern1/Cointracking2Parqet.git"
+  }
+}

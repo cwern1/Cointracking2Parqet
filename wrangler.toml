@@ -1,0 +1,9 @@
+# Cloudflare Pages project. The relay lives in functions/api and stores nothing.
+name = "cointracking2parqet"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-10-01"
+
+[vars]
+# Leave empty in production. Only the e2e tests point these at a fake upstream.
+CT_UPSTREAM = ""
+PARQET_UPSTREAM = ""

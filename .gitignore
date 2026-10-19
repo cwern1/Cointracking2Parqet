@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.wrangler/
+.dev.vars
+.env.local
+test-results/
+playwright-report/
+tests/fixtures/private/
+dist-e2e/
+spec/
