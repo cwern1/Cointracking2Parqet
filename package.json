@@ -18,7 +18,7 @@
   "license": "MIT",
   "type": "module",
   "dependencies": {
-    "preact": "^10.29.8"
+    "preact": "^11.0.1"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20261019.1",
