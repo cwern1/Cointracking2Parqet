@@ -276,7 +276,7 @@ function renderParqet() {
   $('parqet-disconnected').hidden = state.connected;
   $('parqet-connected').hidden = !state.connected;
   $('connect').disabled = state.busy !== null || clientIdMissing;
-  $('connect').textContent = state.busy === 'connect' ? 'Connecting…' : 'Connect Parqet';
+  $('connect-label').textContent = state.busy === 'connect' ? 'Connecting…' : 'Connect with Parqet';
   $('pf-loading').hidden = state.portfolios !== null;
 
   const chips = (state.portfolios ?? [])
