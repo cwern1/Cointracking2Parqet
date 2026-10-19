@@ -94,7 +94,7 @@ In the Cloudflare dashboard, open **Workers & Pages**, create a Pages project an
 
 Cloudflare serves `public/` and compiles `functions/` itself.
 
-- **Domain:** Attach a custom domain such as `cointracking2parqet.christoph-werner.com`, and add `https://<domain>/callback` as a redirect URL in the Parqet console.
+- **Domain:** Attach a custom domain such as `cointracking2parqet.example.com`, and add `https://<domain>/callback` as a redirect URL in the Parqet console.
 - **Logging:** Keep observability and Logpush off for this project.
 - **Forks:** Cloudflare does not build previews for pull requests from forks. Production only builds from `main`, where only the maintainer merges.
 - **Confidential client:** If Parqet ever requires one, add `PARQET_CLIENT_SECRET` as an encrypted variable. The relay then adds it to token requests. It is an app secret, not user data.
