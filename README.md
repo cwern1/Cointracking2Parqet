@@ -2,7 +2,7 @@
 
 Sync your [CoinTracking](https://cointracking.info) transactions into a [Parqet](https://parqet.com) portfolio. CoinTracking connects to hundreds of exchanges and wallets. Parqet's own crypto autosync covers only a few. Cointracking2Parqet lets you use the first to feed the second.
 
-Everything runs in your browser. Nothing is stored on a server.
+Everything runs in your browser, and your CoinTracking API secret never leaves it. Requests pass through a small relay that stores and logs nothing.
 
 ## How it works
 

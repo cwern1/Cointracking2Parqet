@@ -1,7 +1,7 @@
 {
   "name": "cointracking2parqet",
   "private": true,
-  "description": "Sync CoinTracking transactions into a Parqet portfolio, entirely in the browser. No dependencies.",
+  "description": "Sync CoinTracking transactions into a Parqet portfolio from the browser. No dependencies.",
   "license": "MIT",
   "type": "module",
   "repository": {
